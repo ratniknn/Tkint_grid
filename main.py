@@ -2,7 +2,7 @@ import os
 import babel.numbers
 from datetime import datetime
 from pathlib import Path
-from tkinter import Tk, Text, BOTH, W, N, E, S, filedialog, END
+from tkinter import Tk, Text, BOTH, W, N, E, S, filedialog, END, Radiobutton, Checkbutton, IntVar
 from tkinter.messagebox import showinfo, askyesno
 from tkinter.ttk import Frame, Button, Label, Style, Entry, Combobox
 
@@ -34,6 +34,7 @@ class Example(Frame):
         self.rowconfigure(6, pad=3)
         self.rowconfigure(7, pad=3)
         self.rowconfigure(8, pad=3)
+        self.rowconfigure(9, pad=3)
 
         self.lbl = Label(self, text="Удаление файлов по дате")
         self.lbl.grid(row=0, sticky=W, pady=4, padx=5)
@@ -66,8 +67,17 @@ class Example(Frame):
         self.txt_log = Text(self, width=40, height=8)
         self.txt_log.grid(row=8, column=0, padx=5)
 
+        self.enable =IntVar()
+        self.no_del_path = Checkbutton(self, text='Удалять\nпустые \nпапки', variable=self.enable)
+        print(self.enable.get())
+
+        self.no_del_path.grid(row=8, column=3)
+        self.no_del_path.select()
+        print(self.enable.get())
+
         self.btn_del = Button(self, text="Удалить выбранное", command=self.del_file)
         self.btn_del.grid(row=9, column=0, padx=5)
+
 
     # функция для открытия окна выбора папки
     def OnOpen(self):
@@ -187,12 +197,13 @@ class Example(Frame):
                                     os.remove(os.path.join(root1, file))
                                     count_file += 1
                         # удаление пустых папок. Проверяем на пустоту папки.
-                        for root1, dirs1, files1 in os.walk(pasts):
-                            for dir1 in dirs1:
-                                path_r = root1 + '/' + dir1
-                                if not os.listdir(path_r):
-                                    os.rmdir(path_r)
-                                    count_dir += 1
+                        if self.enable.get() == 1:
+                            for root1, dirs1, files1 in os.walk(pasts):
+                                for dir1 in dirs1:
+                                    path_r = root1 + '/' + dir1
+                                    if not os.listdir(path_r):
+                                        os.rmdir(path_r)
+                                        count_dir += 1
             date_file = dt.strftime('%d.%m.%Y')
             text_f = '\nУдалено файлов ранее ' + date_file + ' - ' + str(count_file)
             self.txt_log.insert('5.0', text_f)
