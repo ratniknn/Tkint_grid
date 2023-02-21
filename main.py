@@ -17,7 +17,7 @@ class Example(Frame):
 
     def initUI(self):
 
-        self.master.title("Диалоговое окно в Tkinter")
+        self.master.title("ООО Спортмастер -удаление файлов по выбранной дате")
         self.pack(fill=BOTH, expand=True)
 
         self.columnconfigure(0, pad=3)
@@ -30,32 +30,44 @@ class Example(Frame):
         self.rowconfigure(2, pad=3)
         self.rowconfigure(3, pad=3)
         self.rowconfigure(4, pad=3)
+        self.rowconfigure(5, pad=3)
+        self.rowconfigure(6, pad=3)
+        self.rowconfigure(7, pad=3)
+        self.rowconfigure(8, pad=3)
 
-        lbl = Label(self, text="Удаление файлов по дате")
-        lbl.grid(sticky=W, pady=4, padx=5)
+        self.lbl = Label(self, text="Удаление файлов по дате")
+        self.lbl.grid(row=0, sticky=W, pady=4, padx=5)
+        self.lbl1 = Label(self, text="1.Выберите папку с перечнем магазинов")
+        self.lbl1.grid(row=1, sticky=W, pady=4, padx=5)
+        self.lbl2 = Label(self, text="2.Выберите общую папку из перечня, \nв которой надо удалить файлы")
+        self.lbl2.grid(row=2, sticky=W, pady=4, padx=5)
+        self.lbl3 = Label(self, text="3.Выберите выберите дату, \nранее которой надо удалить файлы")
+        self.lbl3.grid(row=3, sticky=W, pady=4, padx=5)
+        self.lbl3 = Label(self, text="4.Нажмите удалить файлы и подтвердите удаление. \nВНИМАНИЕ!! Файлы удаляются безвозвратно.")
+        self.lbl3.grid(row=4, sticky=W, pady=4, padx=5)
 
-        self.path_del = Entry(self, width=50)
-        self.path_del.grid(row=1, column=0, columnspan=2, padx=5, sticky=W)
+        self.path_del = Entry(self, width=56)
+        self.path_del.grid(row=5, column=0, columnspan=2, padx=5, sticky=W)
 
-        abtn = Button(self, text="Путь", command=self.OnOpen)
-        abtn.grid(row=1, column=3)
+        self.abtn = Button(self, text="Путь", command=self.OnOpen)
+        self.abtn.grid(row=5, column=3)
 
         self.path_general = Combobox(self)
-        self.path_general.grid(row=2, column=0, columnspan=2, padx=5, sticky=W+E)
+        self.path_general.grid(row=6, column=0, columnspan=2, padx=5, sticky=W+E)
 
         # создание поля выбора даты
         self.cal_del = DateEntry(self, width=12, hight=28, background='#3A81EA', locale='ru',
                                  foreground='white', borderwidth=5, border_radius=5, year=2016)
-        self.cal_del.grid(row=3, column=0, columnspan=2, padx=5, sticky="we")
+        self.cal_del.grid(row=7, column=0, columnspan=2, padx=5, sticky="we")
 
-        self.cbtn = Button(self, text="Выбрать", command=self.count_file)
-        self.cbtn.grid(row=3, column=3, pady=4)
+        self.cbtn = Button(self, text="Анализ", command=self.count_file)
+        self.cbtn.grid(row=7, column=3, pady=4)
 
         self.txt_log = Text(self, width=40, height=8)
-        self.txt_log.grid(row=4, column=0, padx=5)
+        self.txt_log.grid(row=8, column=0, padx=5)
 
         self.btn_del = Button(self, text="Удалить выбранное", command=self.del_file)
-        self.btn_del.grid(row=5, column=0, padx=5)
+        self.btn_del.grid(row=9, column=0, padx=5)
 
     # функция для открытия окна выбора папки
     def OnOpen(self):
@@ -80,7 +92,7 @@ class Example(Frame):
         print(count)
         print(path_list)
         self.path_general = Combobox(master=self, values=path_list, state='readonly')
-        self.path_general.grid(row=2, column=0, columnspan=2, padx=5, sticky=W+E)
+        self.path_general.grid(row=6, column=0, columnspan=2, padx=5, sticky=W+E)
 
     # Функция для подсчета файлов по дате в выбранной папке
     def count_file(self):
