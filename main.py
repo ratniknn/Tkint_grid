@@ -1,4 +1,7 @@
+import glob
 import os
+import pathlib
+
 import babel.numbers
 from datetime import datetime
 from pathlib import Path
@@ -35,6 +38,7 @@ class Example(Frame):
         self.rowconfigure(7, pad=3)
         self.rowconfigure(8, pad=3)
         self.rowconfigure(9, pad=3)
+        self.rowconfigure(10, pad=3)
 
         self.lbl = Label(self, text="Удаление файлов по дате")
         self.lbl.grid(row=0, sticky=W, pady=4, padx=5)
@@ -56,27 +60,36 @@ class Example(Frame):
         self.path_general = Combobox(self)
         self.path_general.grid(row=6, column=0, columnspan=2, padx=5, sticky=W+E)
 
+        self.lbl_frame = Frame(self, width=55)
+        self.lbl_frame.grid(row=7, column=0, padx=5)
+        self.xls_val = IntVar()
+        self.lbl_xls = Checkbutton(self.lbl_frame, text='*.xls', onvalue=1, offvalue=0, variable=self.xls_val)
+        self.lbl_xls.grid(row=0, column=0)
+        self.doc_val = IntVar()
+        self.lbl_doc =Checkbutton(self.lbl_frame, text='*.doc\n*.docx', onvalue=1, offvalue=0, variable=self.doc_val)
+        self.lbl_doc.grid(row=0, column=1)
+
         # создание поля выбора даты
         self.cal_del = DateEntry(self, width=12, hight=28, background='#3A81EA', locale='ru',
                                  foreground='white', borderwidth=5, border_radius=5, year=2016)
-        self.cal_del.grid(row=7, column=0, columnspan=2, padx=5, sticky="we")
+        self.cal_del.grid(row=8, column=0, columnspan=2, padx=5, sticky="we")
+
+        self.btn_suf_del = Button(self, text='Удалить по \nрасширению')
+        self.btn_suf_del.grid(row=10, column=3)
 
         self.cbtn = Button(self, text="Анализ", command=self.count_file)
-        self.cbtn.grid(row=7, column=3, pady=4)
+        self.cbtn.grid(row=8, column=3, pady=4)
 
         self.txt_log = Text(self, width=40, height=8)
-        self.txt_log.grid(row=8, column=0, padx=5)
+        self.txt_log.grid(row=9, column=0, padx=5)
 
         self.enable =IntVar()
         self.no_del_path = Checkbutton(self, text='Удалять\nпустые \nпапки', variable=self.enable)
-        print(self.enable.get())
-
-        self.no_del_path.grid(row=8, column=3)
+        self.no_del_path.grid(row=9, column=3)
         self.no_del_path.select()
-        print(self.enable.get())
 
         self.btn_del = Button(self, text="Удалить выбранное", command=self.del_file)
-        self.btn_del.grid(row=9, column=0, padx=5)
+        self.btn_del.grid(row=10, column=0, padx=5)
 
 
     # функция для открытия окна выбора папки
@@ -89,27 +102,34 @@ class Example(Frame):
     # функция выбора списка папок для Combobox
     def gen_path(self):
         path = self.path_del.get()
-        path_list = []
+        path_list = [r'[Выбрать все файлы во всех папках]']
         count = 0
-        for file in Path(path).glob('*'):
-            for dir1 in file.glob('*'):
+        for resours_dirs in Path(path).glob('*'):
+            for dir1 in resours_dirs.glob('*'):
                 second_path = dir1.name
+                # собираем перечень папок. Исключаем повторения.
                 if second_path in path_list:
                     continue
                 else:
-                    path_list.append(second_path)
-                    count += 1
+                    # проверка является путь до объекта папкой или нет. Если да добавляем в список для выбора.
+                    if os.path.isdir(dir1):
+                        print(dir1.name)
+                        path_list.append(second_path)
+                        count += 1
         print(count)
         print(path_list)
-        self.path_general = Combobox(master=self, values=path_list, state='readonly')
-        self.path_general.grid(row=6, column=0, columnspan=2, padx=5, sticky=W+E)
+        # пересоздаём ComboBox со списком папок
+        self.path_general["values"] = path_list
+        self.path_general["stat"] = 'readonly'
 
     # Функция для подсчета файлов по дате в выбранной папке
     def count_file(self):
+        print("__!!__")
         self.txt_log.delete('1.0', END)
         # строка из комбобокса. Целевая папка
         target_path = self.path_general.get()
-        # путьдо первичной папки
+        print('a' + target_path + 'b')
+        # путь до первичной папки
         path_n = self.path_del.get()
         # получение даты из календаря- формат !!! Datetime.Date (геморой с переоводом)
         dt = self.cal_del.get_date()
@@ -117,38 +137,48 @@ class Example(Frame):
         second = dt.ctime()
         # Перевод даты из строки в формат Datetime.Datetime (можно обрабатывать теперь спокойно)
         sec1 = datetime.strptime(second, "%a %b %d %H:%M:%S %Y")
+        # получение списка расширения файлов для удаления
+        list_suffix =[]
+        if self.xls_val.get() == 1: list_suffix.append(['*.xls', '*.xlxs'])
+        if self.doc_val.get() == 1: list_suffix.append(['*.doc', '*.docx'])
+
+        for i in list_suffix:
+            print(i)
         # счетчики по удаленным файлам, папкам и объему
         count_file = 0
         count_dir = 0
         count_size = 0
+
         # проходим методом glob() и walk() по выбранной директории и проверяем наличии пути до файла
         for i in Path(path_n).glob('*/'):
-            # Формирование пути до аппки "магазина"
+            # Формирование пути до папки "магазина"
             ty = path_n + '/' + i.name
+            print(ty)
             # проходим по дереву каталогов в папке магазина. Получаем путь root и список папок по нему
             for root, dirs, files in os.walk(ty):
                 # находим целевую папку для работы в ней
                 if target_path in dirs:
                     # формируем путь до папок в целевом каталоге
                     pasts = os.path.join(ty, target_path)
+                    print(pasts)
                     # проходим по вложенным папкам и формируем список путей и файлов. root1 - путь до папки с файлами
                     for root1, dirs1, files1 in os.walk(pasts):
                         for file in files1:
-                            # формирование даты создания файла из свойств ()
-                            d = os.stat(os.path.join(root1, file)).st_mtime
-                            dts = datetime.fromtimestamp(d)
-                            # подсчет объем файлов по условию ЕСЛИ дата более ранняя чем указаная(выбранная)
-                            if dts < sec1:
-                                count_size += (os.path.getsize(os.path.join(root1, file)) / 1048576)
-                                count_file += 1
-                        # подсчет пустых папок. Проверяем на пустоту папки.
-                    for root1, dirs1, files1 in os.walk(pasts):
-                        for dir1 in dirs1:
-                            path_r = root1 + '/' + dir1
-                            if not os.listdir(path_r):
-                                print(path_r)
-                                count_dir += 1
-                                print(count_dir)
+                            print("1" + Path(os.path.join(root1, file)).suffix)
+                            if Path(os.path.join(root1, file)).suffix in list_suffix:
+                                # формирование даты создания файла из свойств ()
+                                d = os.stat(os.path.join(root1, file)).st_mtime
+                                dts = datetime.fromtimestamp(d)
+                                # подсчет объем файлов по условию ЕСЛИ дата более ранняя чем указаная(выбранная)
+                                if dts < sec1:
+                                    count_size += (os.path.getsize(os.path.join(root1, file)) / 1048576)
+                                    count_file += 1
+                            # подсчет пустых папок. Проверяем на пустоту папки.
+                        for root1, dirs1, files1 in os.walk(pasts):
+                            for dir1 in dirs1:
+                                path_r = root1 + '/' + dir1
+                                if not os.listdir(path_r):
+                                    count_dir += 1
         date_file = dt.strftime('%d.%m.%Y')
         text_f = 'Найдено файлов ранее ' + date_file + ' - ' + str(count_file)
         self.txt_log.insert('1.0', text_f)
@@ -156,6 +186,7 @@ class Example(Frame):
         self.txt_log.insert('2.0', text_dir)
         text_size = '\nОбъем выбранных файлов - ' + str(round(count_size, 2)) + ' Mb'
         self.txt_log.insert('3.0', text_size)
+
 
     # Функция для удаления файлов по дате в выбранной папке
     def del_file(self):
@@ -197,7 +228,7 @@ class Example(Frame):
                                     os.remove(os.path.join(root1, file))
                                     count_file += 1
                         # удаление пустых папок. Проверяем на пустоту папки.
-                        if self.enable.get() == 1:
+                        if self.enable.get() == 1: # условие для удаления пустой папки. Данные их Checkbutton(галка)
                             for root1, dirs1, files1 in os.walk(pasts):
                                 for dir1 in dirs1:
                                     path_r = root1 + '/' + dir1
@@ -217,7 +248,7 @@ class Example(Frame):
 
 def main():
     root = Tk()
-    root.geometry("450x450")
+    root.geometry("500x500")
     Example()
     root.mainloop()
 
