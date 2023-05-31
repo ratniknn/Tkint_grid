@@ -1,14 +1,12 @@
 import time
-from datetime import datetime
-
 from func_del_file import *
 import os
 from pathlib import Path
-from tkinter import Tk, Text, BOTH, W, N, E, S, filedialog, END, Radiobutton, Checkbutton, IntVar
+from tkinter import Tk, Text, BOTH, W, N, E, S, filedialog, Radiobutton, IntVar
 from tkinter.messagebox import showinfo, askyesno
-from tkinter.ttk import Frame, Button, Label, Style, Entry, Combobox
-
+from tkinter.ttk import Frame, Button, Label, Entry, Combobox
 from tkcalendar import DateEntry
+from babel import numbers
 
 
 class Example(Frame):
@@ -160,12 +158,12 @@ class Example(Frame):
             print(time.mktime(sec_ctime))
             # Перевод даты из строки в формат Datetime.Datetime (можно обрабатывать теперь спокойно)
             time_sec = time.mktime(sec_ctime)
-            # date_maby = datetime.strptime(second, "%a %b %d %H:%M:%S %Y")
+           # date_maby = datetime.strptime(second, "%a %b %d %H:%M:%S %Y")
             file_suffix = self.file_suffix_del.get()
             result = askyesno(title="Подтвержение операции", message="Подтвердить операцию?")
             if result:
                 showinfo("Результат", "Операция подтверждена")
-                count_file = del_file_suffix(path, target_path, time_sec, file_suffix, scan_del)
+                count_file = del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val)
                 date_file = dt.strftime('%d.%m.%Y')
                 if scan_del:
                     text_f = 'Удалено файлов ранее ' + date_file + ' - ' + str(count_file) + '\n'

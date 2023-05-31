@@ -9,7 +9,7 @@ from pathlib import Path
 # file_suffix = ['.xlsx', '.JPG']
 
 
-def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del):
+def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val):
     count = 0
     print(path)
     # проходим методом glob() и walk() по выбранной директории и проверяем наличии пути до файла
@@ -28,13 +28,18 @@ def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del):
                 if target_path_tmp == '**' or resours_dirs.name in target_path:
                     path_tmp = os.path.join(path_j, target_path_tmp)
                     for i in glob.glob(path_tmp, recursive=True):
+                        tmp_time = 0
+                        if rbtn_val == 0:
+                            tmp_time = os.path.getmtime(i)
+                        else:
+                            tmp_time = os.path.getctime(i)
                         print(i) # тестовый принт
                         if pathlib.Path(i).suffix in file_suffix:# тестовый принт
                             print(i)# тестовый принт
                             if os.path.isfile(i):# тестовый принт
                                 print(os.path.getmtime(i))# тестовый принт
                         if os.path.isfile(i) and pathlib.Path(i).suffix in file_suffix \
-                                and os.path.getmtime(i) < time_sec:
+                                and tmp_time < time_sec:
                             if scan_del:
                                 os.remove(i)
                             count += 1
