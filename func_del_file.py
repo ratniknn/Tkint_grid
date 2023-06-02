@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val):
+    list_n = []
+    count_size = 0
     count = 0
     print(path)
     # проходим методом glob() и walk() по выбранной директории и проверяем наличии пути до файла
@@ -26,7 +28,8 @@ def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val
             for resours_dirs in Path(path_j).glob('*'):
                 print(resours_dirs)
                 if target_path_tmp == '**' or resours_dirs.name in target_path:
-                    path_tmp = os.path.join(path_j, target_path_tmp)
+                    if not os.path.isfile(resours_dirs):
+                        path_tmp = os.path.join(resours_dirs, target_path_tmp)
                     for i in glob.glob(path_tmp, recursive=True):
                         tmp_time = 0
                         if rbtn_val == 0:
@@ -34,16 +37,26 @@ def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val
                         else:
                             tmp_time = os.path.getctime(i)
                         print(i) # тестовый принт
-                        if pathlib.Path(i).suffix in file_suffix:# тестовый принт
+                        if os.path.isfile(i) and pathlib.Path(i).suffix in file_suffix:# тестовый принт
                             print(i)# тестовый принт
                             if os.path.isfile(i):# тестовый принт
                                 print(os.path.getmtime(i))# тестовый принт
-                        if os.path.isfile(i) and pathlib.Path(i).suffix in file_suffix \
+                        if 'Удалить все файлы' in file_suffix:
+                            if os.path.isfile(i) and tmp_time < time_sec:
+                                count_size += os.path.getsize(i) / 1048576
+                                if scan_del:
+                                    os.remove(i)
+                                count += 1
+                        else:
+                            if os.path.isfile(i) and pathlib.Path(i).suffix in file_suffix \
                                 and tmp_time < time_sec:
-                            if scan_del:
-                                os.remove(i)
-                            count += 1
-    return count
+                                count_size += os.path.getsize(i) / 1048576
+                                if scan_del:
+                                    os.remove(i)
+                                count += 1
+    list_n.append(count)
+    list_n.append(count_size)
+    return list_n
 
 
 # print(del_file_suffix(path, target_path, time_sec, file_suffix))
