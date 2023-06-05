@@ -1,2 +1,2 @@
-main.exe
+main_suffix.exe
 pause

@@ -27,14 +27,16 @@ def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val
             print(j)
             for resours_dirs in Path(path_j).glob('*'):
                 print(resours_dirs)
-                if target_path_tmp == '**' or resours_dirs.name in target_path:
-                    if not os.path.isfile(resours_dirs):
-                        path_tmp = os.path.join(resours_dirs, target_path_tmp)
+                if target_path_tmp == '**' and not os.path.isfile(resours_dirs):
+                    path_tmp = os.path.join(resours_dirs, target_path_tmp)
+                elif resours_dirs.name in target_path:
+                    path_tmp = os.path.join(path_j, target_path_tmp)
+                try:
                     for i in glob.glob(path_tmp, recursive=True):
                         tmp_time = 0
-                        if rbtn_val == 0:
+                        if rbtn_val == 0 and os.path.isfile(i):
                             tmp_time = os.path.getmtime(i)
-                        else:
+                        elif os.path.isfile(i):
                             tmp_time = os.path.getctime(i)
                         print(i) # тестовый принт
                         if os.path.isfile(i) and pathlib.Path(i).suffix in file_suffix:# тестовый принт
@@ -54,6 +56,8 @@ def del_file_suffix(path, target_path, time_sec, file_suffix, scan_del, rbtn_val
                                 if scan_del:
                                     os.remove(i)
                                 count += 1
+                except:
+                    print("Ops!")
     list_n.append(count)
     list_n.append(count_size)
     return list_n

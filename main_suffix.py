@@ -1,4 +1,6 @@
 import time
+import tkinter
+
 from func_del_file import *
 import os
 from pathlib import Path
@@ -59,7 +61,7 @@ class Example(Frame):
         self.path_general.grid(row=3, column=0, columnspan=2, padx=5, sticky=W+E)
 
         # комбо-бокс для выбора папки внутри основной папки
-        list_suffix = [['.xls', '.xlsx'], ['.doc', '.docx'], ['.pdf', '.PDF'], ['.jpeg', '.jpg', '.JPG', 'png', 'PNG'],
+        list_suffix = [['.xls', '.xlsx', '.ods'], ['.doc', '.docx', '.odt'], ['.pdf', '.PDF'], ['.jpeg', '.jpg', '.JPG', 'png', 'PNG'],
                        ['.dwg', '.DWG', '.bak', '.BAK'], ['.bak', '.BAK'], ['.txt', '.TXT'], 'Удалить все файлы']
         self.file_suffix_del = Combobox(self, values=list_suffix)
         self.file_suffix_del.grid(row=4, column=0, columnspan=2, padx=5, sticky=W + E)
@@ -171,7 +173,7 @@ class Example(Frame):
                 else:
                     text_f = 'Найдено файлов ранее ' + date_file + ' - ' + str(count_file[0]) + '\n' + \
                             'Объем найденных файлов - ' + str(round(count_file[1], 2)) + ' Mb' + '\n'
-                self.txt_log.insert('5.0', text_f)
+                self.txt_log.replace('1.0', tkinter.END, text_f)
             else:
                 showinfo("Результат", "Операция отменена")
 
